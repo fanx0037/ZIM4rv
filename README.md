@@ -1,6 +1,7 @@
 # ZIM4rv
 Zero-inflated models to precisely test genetic associations between zero‐inflated count phenotype and rare variants.
 
+
 ## Installation
 To install the developer version of ZIM4rv, using the 'devtools' package is easiest.
 ```

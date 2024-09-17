@@ -1,5 +1,6 @@
 #' Estimation of phi_hat and lambda_hat for ZIP model
 #'
+#'
 #' This function gives the estimation of 2 parameters phi and lambda for each subject
 #' under the null hypothesis.
 #'

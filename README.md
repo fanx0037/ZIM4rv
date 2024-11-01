@@ -5,7 +5,7 @@ Zero-inflated models to precisely test genetic associations between zero‐infla
 ## Installation
 To install the developer version of ZIM4rv, using the 'devtools' package is easiest.
 ```
-#install.package("devtools")
+#install.packages("devtools")
 library(devtools)
 install_github("fanx0037/ZIM4rv")
 ```

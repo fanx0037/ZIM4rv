@@ -1,11 +1,22 @@
 Package: ZIM4rv
 Type: Package
-Title: What the Package Does (Title Case)
+Title: Precisely modeling zero‐inflated count phenotype for rare variants
 Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Author: Xiaomin Liu
+Maintainer: Xiaomin Liu <e0717571@u.nus.edu>
+Description: Gene‐based association tests to model count data with excessive zeros and rare variants using ZIP/ZINB regression framework.
+License: GPL-3
+URL: https://github.com/fanx0037/ZIM4rv_
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 7.3.2
+Depends: 
+    data.table,
+    pscl,
+    CompQuadForm,
+    stats,
+    SKAT,
+    RNOmni,
+    R (>= 2.10)
+Suggests: 
+    testthat (>= 3.0.0)

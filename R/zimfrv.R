@@ -1,3 +1,5 @@
+#' @title phi_lambda_hat
+#' @description
 #' Estimation of phi_hat and lambda_hat for ZIP model
 #'
 #' This function gives the estimation of 2 parameters phi and lambda for each subject
@@ -31,6 +33,8 @@ phi_lambda_hat <- function(simud){
 }
 
 
+#' @title U_fi_lmd
+#' @description
 #' Compute Score statistics for ZIP model
 #'
 #' This function takes the estimations of phi and lambda produced by the \code{phi_lambda_hat}
@@ -87,9 +91,11 @@ U_fi_lmd <- function(simudata, G_rare){
 }
 
 
+#' @title phi_mu_hat4zinb
+#' @description
 #' Estimation of phi_hat, mu_hat and alpha_hat for ZINB model
 #'
-#' This function gives the estimation of 3 parameters phi, mu and alpha in ZINB model
+#' This function gives the estimation of three parameters phi, mu and alpha in ZINB model
 #' for each subject under the null hypothesis.
 #'
 #' @param simud a data frame containing a phenotype named y and covariates
@@ -122,7 +128,8 @@ phi_mu_hat4zinb <- function(simud){
 }
 
 
-
+#' @title U_phi_mu4zinb
+#' @description
 #' Compute score statistics for ZINB model
 #'
 #' This function takes the estimations of phi and lambda produced by the \code{phi_lambda_hat4negbin}
@@ -185,7 +192,8 @@ U_phi_mu4zinb <- function(simudata, G_rare){
 }
 
 
-
+#' @title p_burden_single
+#' @description
 #' Compute the p-value for the burden test
 #'
 #' This function takes a vector of weights, a data frame of rare variants
@@ -217,6 +225,8 @@ p_burden_single = function(wt,G_rare, s){
 }
 
 
+#' @title p_kernel_single
+#' @description
 #' Compute the p-value for the kernel test
 #'
 #' This function takes a diagonal matrix of weights, a data frame of rare variants
@@ -246,10 +256,12 @@ p_kernel_single = function(wt_matrix2,G_rare, s){
 }
 
 
+#' @title cauchyp
+#' @description
 #' Cauchy combination test (Cauchy‐p)
 #'
 #' This function combines p-values using Cauchy combination test
-#' for the omnibus test of testing the joint genetic effect.
+#' for testing the joint genetic effect.
 #'
 #' @param x a numeric vector containing p-values
 #' @return a combined p-value indicating the joint effect
@@ -268,52 +280,79 @@ cauchyp<-function(x){
 }
 
 
-
-#' Preprocess files in PLINK format
+#' @title preprocess_genedata
+#' @description
+#' Preprocess genotype files in PLINK format
 #'
-#' This function converts PLINK format files into data frames containing genotypes,
-#' phenotypes and covariates information in proper format.
+#' This function converts PLINK format files into data frames containing genotypes information in proper format
+#' for the model fitting and testing.
 #'
 #' @param gene_name a character string of the name of a gene, e.g."CEPT". The name is case-sensitive.
-#' @param region_file region file in PLINK format
-#' @param dosage_file dosage file in PLINK format
+#' @param region_file a file listing genetic regions where each row contains chromosome, basepairs and the name of genetic region respectively
+#' @param dosage_file a dosage file includes dosage information of each variant for all individuals
 #' @param fam_file .fam file in PLINK format
-#' @param pheno_file phenotype file in PLINK format
-#' @param cov_file covariate file in PLINK format
-#' @returns a list of 2 data frames containing genotypes, phenotypes and covariates respectively
+#' @returns a data frame containing genotypes for all individuals in the required format for model fitting and testing
+#'
+#' @examples
+#' data(Ex2_fam)
+#' data(Ex2_dosage)
+#' data(Ex2_region)
+#' preprocess_genedata(Ex2_fam,Ex2_dosage,Ex2_region,"r2")
+#'
+#' @importFrom data.table transpose
 #' @export
 #'
-preprocess <- function(gene_name,region_file,dosage_file,fam_file,pheno_file,cov_file){
-  # region + dosage + fam -> genedata
 
-  # locate the region of the gene
-  gene_ind <- which(region_file[,4]==gene_name)
-  chr_ind <- region_file[gene_ind,1]
-  gene_start <- region_file[gene_ind,2]
-  gene_end <- region_file[gene_ind,3]
-  # select the variants within the region of the gene
-  dosage_sub <- dosage_file[dosage_file[,1]==chr_ind,]
-  dosage_sub[dosage_sub=='na'] <- NA
-  variants_ind <- which(dosage_sub[,4]>=gene_start & dosage_sub[,4]<=gene_end)
-  dosage_transpose <- matrix(as.numeric(t(dosage_sub[variants_ind,-(1:6)])),ncol = length(variants_ind))
-  genedata <- cbind(fam_file[,1:2],dosage_transpose)
-  colnames(genedata) <- c("FID","IID")
+preprocess_genedata <- function(fam_file,dosage_file,region_file,gene_name){
+  locate_gene <- which(region_file[,4]==gene_name)
+  chr <- region_file[locate_gene,1]
+  start_point <- region_file[locate_gene,2]
+  end_point <- region_file[locate_gene,3]
+  id_extract <- fam_file[,1:2]
+  colnames(id_extract) <- c("FID","IID")
+  genotype_select <- which(dosage_file[,4]>=start_point & dosage_file[,4]<=end_point & dosage_file[,1]==chr)
+  genotype_extract <- suppressWarnings(lapply(transpose(dosage_file[genotype_select,7:ncol(dosage_file)]),as.numeric))
+  genedata <- cbind(id_extract,genotype_extract)
+  return(genedata)
+}
 
-  # pheno + cov -> phenodata
+
+#' @title preprocess_phenodata
+#' @description
+#' Preprocess phenotype files in PLINK format
+#'
+#' This function converts PLINK format files into data frames containing phenotypes and covariates information in proper format
+#' for the model fitting and testing.
+#'
+#' @param pheno_file phenotype file in PLINK format
+#' @param cov_file covariate file in PLINK format
+#' @returns a data frame containing phenotypes and covariates respectively for all individuals in the required format for model fitting and testing
+#'
+#' @examples
+#' data(Ex2_pheno)
+#' data(Ex2_covar)
+#' preprocess_phenodata(Ex2_pheno,Ex2_covar)
+#'
+#' @export
+#'
+
+preprocess_phenodata <- function(pheno_file,cov_file){
   pheno_file[pheno_file=='na'] <- NA
   cov_file[cov_file=='na'] <- NA
   colnames(pheno_file)[1:3] <- c("FID","IID","count")
   pheno_file[,3] <- as.numeric(pheno_file[,3])
   colnames(cov_file)[1:2] <- c("FID","IID")
   phenodata <- cbind(pheno_file[,1:3],cov_file[,-(1:2)])
-
-  return(list(phenodata=phenodata,genedata=genedata))
+  return(phenodata)
 }
 
 
+
+#' @title zimfrv
+#' @description
 #' Gene‐based association tests to model zero-inflated count data
 #'
-#' This function performs gene‐based association tests and omnibus tests
+#' This function performs gene‐based association tests
 #' between a set of SNPs/genes and zero-inflated count data
 #' using ZIP regression or ZINB regression or two-stage SKAT model framework.
 #'
@@ -332,7 +371,7 @@ preprocess <- function(gene_name,region_file,dosage_file,fam_file,pheno_file,cov
 #' Both of Family ID (FID) and Individual ID (IID) for each row in the 'genedata'
 #' derived from the PLINK formatted files should be in the same order as in the 'phenodata'.
 #' The number of rows in 'genedata' should be equal to the number of rows in 'phenodata'.
-#' @param name a character string of the name of a gene, e.g. "CETP". The name is case-sensitive.
+#' @param genename a character string of the name of a gene, e.g. "CETP". The name is case-sensitive.
 #' @param weights a character string of pre-specified variant weighting schemes (default="Equal").
 #' "Equal" represents no weight,
 #' "MadsenBrowning" represents the Madsen and Browning (2009) weight,
@@ -345,22 +384,27 @@ preprocess <- function(gene_name,region_file,dosage_file,fam_file,pheno_file,cov
 #' "zip" represents Zero-Inflated Poisson model,
 #' "zinb" represents Zero-Inflated Negative Binomial model,
 #' "skat" represents the two-stage Sequence Kernel Association Test method.
-#' @returns a list of 11 items including the name of gene,
-#' the number of rare variants in the gene,
+#' @returns a list of 10 items including the name of gene,
+#' the number of rare variants in the genetic region,
 #' the kind of method used for modeling,
 #' and individual p-values of gene‐based association tests (burden test and kernel test for both parameters)
-#' and omnibus tests using different methods (Cauchy combination test defaulted).
+#' and combined p-values using Cauchy combination test.
 #'
 #' \item{GeneName}{the name of gene.}
 #' \item{No.Var}{the number of rare variants in the gene.}
 #' \item{Method}{the method used to compute the p-values.}
-#' \item{p.value_phi_burden / p.value_pi_burden}{single p-value for parameter \eqn{\phi} or \eqn{\pi} using burden test.}
+#' \item{p.value_pi_burden}{single p-value for parameter \eqn{\pi} using burden test.}
 #' \item{p.value_lambda_burden / p.value_mu_burden}{single p-value for parameter \eqn{\lambda} or \eqn{\mu} using burden test.}
-#' \item{p.value_phi_kernel / p.value_pi_burden}{single p-value for parameter \eqn{\phi} or \eqn{\pi} using kernel test.}
-#' \item{p.value_lambda_kernel / p.value_mu_burden}{single p-value for parameter \eqn{\lambda} or \eqn{\mu} using kernel test.}
-#' \item{p.value_burden_combined}{Combined p-value of testing the joint effect of both parameters from burden test using Cauchy combination test (Cauchy-p).}
-#' \item{p.value_kernel_combined}{Combined p-value of testing the joint effect of both parameters from kernel test using Cauchy combination test (Cauchy-p).}
+#' \item{p.value_pi_kernel}{single p-value for parameter \eqn{\pi} using kernel test.}
+#' \item{p.value_lambda_kernel / p.value_mu_kernel}{single p-value for parameter \eqn{\lambda} or \eqn{\mu} using kernel test.}
+#' \item{p.value_pi_combined}{Combined p-value of testing parameter \eqn{\pi} from both burden and kernel test using Cauchy combination test.}
+#' \item{p.value_lambda_combined / p.value_mu_combined}{Combined p-value of testing parameter \eqn{\lambda} or \eqn{\mu} from both burden and kernel test using Cauchy combination test.}
 #' \item{p.value_overall}{Combined p-value of testing the overall association using Cauchy combination test.}
+#'
+#' @examples
+#' data(Ex1_phenodata)
+#' data(Ex1_genedata)
+#' zimfrv(Ex1_phenodata,Ex1_genedata,weights = "Beta",max_maf = 0.02,model="zinb")
 #'
 #' @references Fan, Q., Sun, S., & Li, Y.‐J. (2021). Precisely modeling zero‐inflated count phenotype for rare variants. Genetic Epidemiology, 1–14.
 #' @importFrom pscl zeroinfl
@@ -373,7 +417,7 @@ preprocess <- function(gene_name,region_file,dosage_file,fam_file,pheno_file,cov
 #' @importFrom RNOmni RankNorm
 #' @export
 
-zimfrv <- function(phenodata, genedata, genename = "NA", weights = "Equal", missing_cutoff = 0.15, max_maf = 1, model = "zip", omnibus = "Cauchy"){
+zimfrv <- function(phenodata, genedata, genename = "NA", weights = "Equal", missing_cutoff = 0.15, max_maf = 1, model = "zip"){
 
   n <- nrow(genedata)
   if(nrow(phenodata) != n){
@@ -424,15 +468,15 @@ zimfrv <- function(phenodata, genedata, genename = "NA", weights = "Equal", miss
     p_fi_kernel <- p_kernel_single(wt_matrix, genedata_rare, s_fi)
     p_lambda_kernel <- p_kernel_single(wt_matrix, genedata_rare, s_lambda)
 
-    p_burden_cauchy <- cauchyp(c(p_fi_burden,p_lambda_burden))
-    p_kernel_cauchy <- cauchyp(c(p_fi_kernel,p_lambda_kernel))
+    p_pi_combined <- cauchyp(c(p_fi_burden,p_fi_kernel))
+    p_lambda_combined <- cauchyp(c(p_lambda_burden,p_lambda_kernel))
 
-    p_overall <- cauchyp(c(p_burden_cauchy,p_kernel_cauchy))
+    p_overall <- cauchyp(c(p_pi_combined,p_lambda_combined))
 
     output <- data.frame(GeneName=genename,No.Var=n_rare,Method="ZIP",
-                         p_phi_burden=p_fi_burden,p_lambda_burden=p_lambda_burden,
-                         p_phi_kernel=p_fi_kernel,p_lambda_kernel=p_lambda_kernel,
-                         p_burden_cauchy=p_burden_cauchy,p_kernel_cauchy=p_kernel_cauchy,
+                         p_pi_burden=p_fi_burden,p_lambda_burden=p_lambda_burden,
+                         p_pi_kernel=p_fi_kernel,p_lambda_kernel=p_lambda_kernel,
+                         p_pi_combined=p_pi_combined,p_lambda_combined=p_lambda_combined,
                          p_overall=p_overall)
 
 
@@ -450,15 +494,15 @@ zimfrv <- function(phenodata, genedata, genename = "NA", weights = "Equal", miss
     p_phi_kernel <- p_kernel_single(wt_matrix, genedata_rare, s_phi)
     p_mu_kernel <- p_kernel_single(wt_matrix, genedata_rare, s_mu)
 
-    p_burden_cauchy <- cauchyp(c(p_phi_burden,p_mu_burden))
-    p_kernel_cauchy <- cauchyp(c(p_phi_kernel,p_mu_kernel))
+    p_phi_combined <- cauchyp(c(p_phi_burden,p_phi_kernel))
+    p_mu_combined <- cauchyp(c(p_mu_burden,p_mu_kernel))
 
-    p_overall <- cauchyp(c(p_burden_cauchy,p_kernel_cauchy))
+    p_overall <- cauchyp(c(p_phi_combined,p_mu_combined))
 
     output <- data.frame(GeneName=genename,No.Var=n_rare,Method="ZINB",
-                         p_phi_burden=p_phi_burden,p_mu_burden=p_mu_burden,
-                         p_phi_kernel=p_phi_kernel,p_mu_kernel=p_mu_kernel,
-                         p_burden_cauchy=p_burden_cauchy,p_kernel_cauchy=p_kernel_cauchy,
+                         p_pi_burden=p_phi_burden,p_mu_burden=p_mu_burden,
+                         p_pi_kernel=p_phi_kernel,p_mu_kernel=p_mu_kernel,
+                         p_pi_combined=p_phi_combined,p_mu_combined=p_mu_combined,
                          p_overall=p_overall)
   }else if(model=="skat"){
     y <- phenodata[,1]
@@ -479,15 +523,15 @@ zimfrv <- function(phenodata, genedata, genename = "NA", weights = "Equal", miss
     p_pi_kernel <- SKAT(genedata_rare, obj, weights = wt)$p.value
     p_mu_kernel <- SKAT(Z, obj.c, weights = wt)$p.value
 
-    p_burden_cauchy <- cauchyp(c(p_pi_burden,p_mu_burden))
-    p_kernel_cauchy <- cauchyp(c(p_pi_kernel,p_mu_kernel))
+    p_pi_combined <- cauchyp(c(p_pi_burden,p_pi_kernel))
+    p_mu_combined <- cauchyp(c(p_mu_burden,p_mu_kernel))
 
-    p_overall <- cauchyp(c(p_burden_cauchy,p_kernel_cauchy))
+    p_overall <- cauchyp(c(p_pi_combined,p_mu_combined))
 
     output <- data.frame(GeneName=genename,No.Var=n_rare,Method="SKAT",
                          p_pi_burden=p_pi_burden,p_mu_burden=p_mu_burden,
                          p_pi_kernel=p_pi_kernel,p_mu_kernel=p_mu_kernel,
-                         p_burden_cauchy=p_burden_cauchy,p_kernel_cauchy=p_kernel_cauchy,
+                         p_pi_combined=p_pi_combined,p_mu_combined=p_mu_combined,
                          p_overall=p_overall)
 
   }else{

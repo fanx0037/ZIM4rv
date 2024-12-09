@@ -1,0 +1,29 @@
+#' An example dataset of phenodata
+#'
+#' Small, artificially generated toy data set that
+#' provides artificial information of count phenotypes and covariates for 200 individuals
+#' to illustrate the analysis with the use of the package.
+#'
+#' @docType data
+#'
+#' @usage data(Ex1_phenodata)
+#'
+#' @format An object of class \code{"data.frame"}
+#' \describe{
+#'  \item{FID}{Family IDs}
+#'  \item{IID}{Individual IDs}
+#'  \item{count}{Zero-inflated count phenotypes}
+#'  \item{educ}{Covariate education years}
+#'  \item{sex}{Covariate sex}
+#'  \item{PC1}{The first principal component}
+#'  \item{PC2}{The second principal component}
+#'  \item{PC3}{The third principal component}
+#' }
+#' @references This data set was artificially created and modified for the ZIM4rv package.
+#' @keywords datasets
+#' @examples
+#'
+#' data(Ex1_phenodata)
+#' head(Ex1_phenodata)
+#'
+"Ex1_phenodata"

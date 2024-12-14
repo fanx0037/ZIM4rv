@@ -1,6 +1,6 @@
 Package: ZIM4rv
 Type: Package
-Title: Precisely modeling zero‐inflated count phenotype for rare variants
+Title: Gene‐based Association Tests of Zero‐inflated Count Phenotype for Rare Variants
 Version: 0.1.0
 Author: Xiaomin Liu
 Maintainer: Xiaomin Liu <e0717571@u.nus.edu>
@@ -17,7 +17,7 @@ Depends:
     stats,
     SKAT,
     RNOmni,
-    R (>= 2.10)
+    R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0)
 BugReports: https://github.com/fanx0037/ZIM4rv/issues

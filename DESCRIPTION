@@ -2,7 +2,10 @@ Package: ZIM4rv
 Type: Package
 Title: Gene‐based Association Tests of Zero‐inflated Count Phenotype for Rare Variants
 Version: 0.1.1
-Author: Xiaomin Liu
+Authors@R: person(given = "Xiaomin",
+                    family = "Liu",
+                    role = c("aut", "cre","cph"),
+                    email = "e0717571@u.nus.edu")
 Maintainer: Xiaomin Liu <e0717571@u.nus.edu>
 Description: Gene‐based association tests to model count data with excessive zeros and rare variants using ZIP/ZINB regression framework.
 License: GPL-3

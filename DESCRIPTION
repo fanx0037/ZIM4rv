@@ -7,7 +7,7 @@ Authors@R: person(given = "Xiaomin",
                     role = c("aut", "cre","cph"),
                     email = "e0717571@u.nus.edu")
 Maintainer: Xiaomin Liu <e0717571@u.nus.edu>
-Description: Gene‐based association tests to model count data with excessive zeros and rare variants using ZIP/ZINB regression framework.
+Description: Gene‐based association tests to model count data with excessive zeros and rare variants using zero-inflated Poisson/zero-inflated negative Binomial regression framework. This method was originally described by Fan, Sun, and Li in Genetic Epidemiology 46(1):73-86 <doi:10.1002/gepi.22438>.
 License: GPL-3
 URL: https://github.com/fanx0037/ZIM4rv
 Encoding: UTF-8
